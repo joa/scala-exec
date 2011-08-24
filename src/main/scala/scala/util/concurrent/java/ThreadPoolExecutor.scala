@@ -1,81 +1,47 @@
 package scala.util.concurrent.java
 
-import scala.util.concurrent.ExecutorService
-import scala.util.concurrent.{
-  Days, Hours, Microseconds, Milliseconds,
-  Minutes, Nanoseconds, Seconds, TimeUnit}
-import scala.util.concurrent.Future
+import scala.util.concurrent.{Executors, ExecutorService, Future, TimeUnit, TimeUnits}
 
 import java.util.concurrent.{
   TimeUnit => JTimeUnit,
-  ThreadPoolExecutor => JThreadPoolExecutor}
+  ThreadPoolExecutor => JThreadPoolExecutor,
+  BlockingQueue => JBlockingQueue,
+  SynchronousQueue => JSynchronousQueue,
+  ThreadFactory => JThreadFactory,
+  RejectedExecutionHandler => JRejectedExecutionHandler,
+  Executors => JExecutors}
+
+import java.lang.{Runnable => JRunnable}
 
 /**
  * @author Joa Ebert
  */
-class ThreadPoolExecutor(private val threadPoolExecutor: JThreadPoolExecutor)
-    extends ExecutorService {
+class ThreadPoolExecutor(threadPoolExecutor: JThreadPoolExecutor)
+    extends ExecutorServiceWrapper(threadPoolExecutor) {
   import scala.collection.JavaConversions._
 
-  override def execute[A](f: () => A) {
-    threadPoolExecutor.execute(JavaConversions.asJavaRunnable(f))
-  }
-  
-  override def awaitTermination(timeout: Long, unit: TimeUnit): Boolean =
-    threadPoolExecutor.
-      awaitTermination(JavaConversions.
-        asJavaTimeUnit(timeout, unit), JavaConversions.JavaTimeUnit)
-
-  override def invokeAll[A](collection: Iterable[() => A]): Seq[Future[A]] =
-    threadPoolExecutor.
-      invokeAll(
-        collection map JavaConversions.asJavaCallable
-      ) map JavaConversions.asScalaFuture
-
-  override def invokeAll[A](collection: Iterable[() => A], timeout: Long, unit: TimeUnit): Seq[Future[A]] =
-    threadPoolExecutor.
-      invokeAll(
-        collection map JavaConversions.asJavaCallable,
-        JavaConversions.asJavaTimeUnit(timeout, unit),
-        JavaConversions.JavaTimeUnit
-      ) map JavaConversions.asScalaFuture
-
-  override def invokeAny[A](collection: Iterable[() => A]): A =
-    threadPoolExecutor.
-        invokeAny(collection map JavaConversions.asJavaCallable)
-
-  override def invokeAny[A](collection: Iterable[() => A], timeout: Long, unit: TimeUnit): A =
-    threadPoolExecutor.
-        invokeAny(collection map JavaConversions.asJavaCallable,
-        JavaConversions.asJavaTimeUnit(timeout, unit),
-        JavaConversions.JavaTimeUnit)
-
-  override def isShutdown: Boolean =
-    threadPoolExecutor.isShutdown()
-
-  override def isTerminated: Boolean =
-    threadPoolExecutor.isTerminated()
+  def this(
+      corePoolSize: Int,
+      maximumPoolSize: Int,
+      keepAliveTime: Int,
+      unit: TimeUnit,
+      workQueue: JBlockingQueue[JRunnable] = new JSynchronousQueue(),
+      threadFactory: JRunnable => Thread = Executors.defaultThreadFactory(),
+      handler: JRejectedExecutionHandler = new JThreadPoolExecutor.AbortPolicy()
+  ) = this(
+    new JThreadPoolExecutor(
+      corePoolSize,
+      maximumPoolSize,
+      JavaConversions.asJavaTimeUnit(keepAliveTime, unit),
+      JavaConversions.JavaTimeUnit,
+      workQueue,
+      JavaConversions.asJavaThreadFactory(threadFactory),
+      handler
+    )
+  )
 
   def isTerminating =
     threadPoolExecutor.isTerminating()
-
-  override def shutdown() {
-    threadPoolExecutor.shutdown()
-  }
-
-  override def shutdownNow(): Seq[() => _] =
-    (threadPoolExecutor.shutdownNow() collect {
-      case x: WithFunction[_] => x.f
-    }).toSeq
-
-  override def submit[A](f: () => A): Future[A] =
-    JavaConversions.asScalaFuture(
-      threadPoolExecutor.
-          submit(JavaConversions.asJavaCallable(f)))
-
-  override def submit[A, B](f: () => A, result: B): Future[B] =
-    JavaConversions.asScalaFuture(
-      threadPoolExecutor.submit(JavaConversions.asJavaRunnable(f), result))
 
   def allowCoreThreadTimeOut = threadPoolExecutor.allowsCoreThreadTimeOut()
 
@@ -93,7 +59,9 @@ class ThreadPoolExecutor(private val threadPoolExecutor: JThreadPoolExecutor)
     threadPoolExecutor.setCorePoolSize(value)
   }
 
-  def getKeepAliveTime(unit: TimeUnit) =
+  def getKeepAliveTime(unit: TimeUnit) = {
+    import TimeUnits._
+    
     threadPoolExecutor.getKeepAliveTime(unit match {
       case Nanoseconds => JTimeUnit.NANOSECONDS
       case Microseconds => JTimeUnit.MICROSECONDS
@@ -103,6 +71,7 @@ class ThreadPoolExecutor(private val threadPoolExecutor: JThreadPoolExecutor)
       case Hours => JTimeUnit.HOURS
       case Days => JTimeUnit.DAYS
     })
+  }
 
   def setKeepAliveTime(time: Long, unit: TimeUnit) {
     threadPoolExecutor.setKeepAliveTime(
@@ -120,15 +89,22 @@ class ThreadPoolExecutor(private val threadPoolExecutor: JThreadPoolExecutor)
 
   def poolSize = threadPoolExecutor.getPoolSize
 
-  //threadPoolExecutor.getRejectedExecutionHandler
-  //threadPoolExecutor.setRejectedExecutionHandler
+  def rejectedExecutionHandler =
+    threadPoolExecutor.getRejectedExecutionHandler
 
-  //threadPoolExecutor.getQueue
+  def rejectedExecutionHandler_=(value: JRejectedExecutionHandler) {
+    threadPoolExecutor.setRejectedExecutionHandler(value)
+  }
+
+  def queue = threadPoolExecutor.getQueue
 
   def taskCount = threadPoolExecutor.getTaskCount
 
-  //threadPoolExecutor.getThreadFactory
-  //threadPoolExecutor.setThreadFactory()
+  def threadFactory = threadPoolExecutor.getThreadFactory
+
+  def threadFactory_=(value: JThreadFactory) {
+    threadPoolExecutor.setThreadFactory(value)
+  }
 
   def prestartAllCoreThreads() {
     threadPoolExecutor.prestartAllCoreThreads()

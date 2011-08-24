@@ -3,8 +3,14 @@ package scala.util.concurrent.java
 import scala.util.concurrent.TimeUnit
 import scala.util.concurrent.Future
 
+import java.util.concurrent.{
+  ThreadFactory => JThreadFactory,
+  TimeUnit => JTimeUnit,
+  Callable => JCallable,
+  Future => JFuture
+}
+
 import java.lang.{Runnable => JRunnable}
-import java.util.concurrent.{TimeUnit => JTimeUnit, Callable => JCallable, Future => JFuture}
 
 /**
  * @author Joa Ebert
@@ -23,6 +29,11 @@ object JavaConversions {
   def asJavaRunnable[A](f: () => A): JRunnable = new Runnable[A](f)
 
   def asJavaCallable[A](f: () => A): JCallable[A] = new Callable[A](f)
+
+  def asJavaThreadFactory(f: JRunnable => Thread): JThreadFactory =
+    new JThreadFactory {
+      def newThread(runnable: JRunnable) = f(runnable)
+    }
 
   def asEither[A](f: => A): Either[Throwable, A] =
     try {
