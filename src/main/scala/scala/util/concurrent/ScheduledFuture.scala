@@ -3,4 +3,4 @@ package scala.util.concurrent
 /**
  * @author Joa Ebert
  */
-trait ScheduledFuture 
+trait ScheduledFuture[A] extends Future[A] with Delayed

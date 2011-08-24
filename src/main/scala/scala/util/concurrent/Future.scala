@@ -3,4 +3,14 @@ package scala.util.concurrent
 /**
  * @author Joa Ebert
  */
-class Future
+trait Future[A] {
+  def cancel(mayInterruptIfRunning: Boolean)
+
+  def get(): Either[Throwable, A]
+
+  def get(timeout: Long, unit: TimeUnit): Either[Throwable, A]
+
+  def isCancelled: Boolean
+
+  def isDone: Boolean
+}
