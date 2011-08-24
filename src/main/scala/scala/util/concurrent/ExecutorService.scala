@@ -6,13 +6,13 @@ package scala.util.concurrent
 trait ExecutorService extends Executor {
   def awaitTermination(timeout: Long, unit: TimeUnit): Boolean
 
-  def invokeAll[A](collection: Iterable[Unit => A]): Seq[Future[A]]
+  def invokeAll[A](collection: Iterable[() => A]): Seq[Future[A]]
 
-  def invokeAll[A](collection: Iterable[Unit => A], timeout: Long, unit: TimeUnit): Seq[Future[A]]
+  def invokeAll[A](collection: Iterable[() => A], timeout: Long, unit: TimeUnit): Seq[Future[A]]
   
-  def invokeAny[A](collection: Iterable[Unit => A]): A
+  def invokeAny[A](collection: Iterable[() => A]): A
 
-  def invokeAny[A](collection: Iterable[Unit => A], timeout: Long, unit: TimeUnit): A
+  def invokeAny[A](collection: Iterable[() => A], timeout: Long, unit: TimeUnit): A
 
   def isShutdown: Boolean
 
@@ -20,9 +20,9 @@ trait ExecutorService extends Executor {
 
   def shutdown()
 
-  def shutdownNow(): Seq[Unit => _]
+  def shutdownNow(): Seq[() => _]
 
-  def submit[A](f: => A): Future[A]
+  def submit[A](f: () => A): Future[A]
 
-  def submit[A, B](f: => A, result: B): Future[B]
+  def submit[A, B](f: () => A, result: B): Future[B]
 }

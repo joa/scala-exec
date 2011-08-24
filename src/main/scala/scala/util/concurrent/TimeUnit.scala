@@ -4,33 +4,40 @@ package scala.util.concurrent
  * @author Joa Ebert
  */
 sealed trait TimeUnit {
-	def toMillis(x: Long): Long
+	def toNanos(x: Long): Long
 }
 
+case object Nanoseconds extends TimeUnit {
+  override def toNanos(x: Long) = x
+}
+
+case object Microseconds extends TimeUnit {
+  override def toNanos(x: Long) = x * 1000L
+}
 case object Milliseconds extends TimeUnit {
-	override def toMillis(x: Long) = x
+	override def toNanos(x: Long) = x * 1000L * 1000L
 }
 
 case object Seconds extends TimeUnit {
-	private val FACTOR = 1000L
+	private val UnitConversionFactor = 1000L * 1000L * 1000L
 	
-	override def toMillis(x: Long) = x * FACTOR
+	override def toNanos(x: Long) = x * UnitConversionFactor
 }
 
 case object Minutes extends TimeUnit {
-	private val FACTOR = 60L * 1000L
+	private val UnitConversionFactor = 60L * 1000L * 1000L * 1000L
 
-	override def toMillis(x: Long) = x * FACTOR
+	override def toNanos(x: Long) = x * UnitConversionFactor
 }
 
 case object Hours extends TimeUnit {
-	private val FACTOR = 60L * 60L * 1000L
+	private val UnitConversionFactor = 60L * 60L * 1000L * 1000L * 1000L
 
-	override def toMillis(x: Long) = x * FACTOR
+	override def toNanos(x: Long) = x * UnitConversionFactor
 }
 
 case object Days extends TimeUnit {
-	private val FACTOR = 24L * 60L * 60L * 1000L
+	private val UnitConversionFactor = 24L * 60L * 60L * 1000L * 1000L * 1000L
 
-	override def toMillis(x: Long) = x * FACTOR
+	override def toNanos(x: Long) = x * UnitConversionFactor
 }

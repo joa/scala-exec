@@ -4,5 +4,5 @@ package scala.util.concurrent
  * @author Joa Ebert
  */
 trait Executor {
-	def execute(f: => Unit)
+	def execute[A](f: () => A)
 }
