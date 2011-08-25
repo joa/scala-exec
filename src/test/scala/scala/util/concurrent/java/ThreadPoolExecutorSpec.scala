@@ -44,6 +44,7 @@ class ThreadPoolExecutorSpec extends Specification {
 
     "return the the closure for pending tasks" in {
       import _root_.java.util.concurrent.{LinkedBlockingQueue => JLinkedBlockingQueue}
+
       val exec = new ThreadPoolExecutor(
         1, 1, Long.MaxValue, TimeUnits.Nanoseconds,
         workQueue = new JLinkedBlockingQueue(2)

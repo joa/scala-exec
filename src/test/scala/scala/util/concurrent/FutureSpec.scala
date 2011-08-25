@@ -31,5 +31,24 @@ class FutureSpec extends Specification {
           }
       }
     }
+
+    "support for-selector syntax" in {
+      withExec {
+        exec =>
+          def task() = 1
+
+          val tasks: List[() => Int] = List.fill(4) { task _ }
+
+          val results: Seq[Int] =
+            for {
+              future <- exec.invokeAll(tasks)
+              result <- future
+            } yield {
+              result
+            }
+
+          results.sum must_== (tasks map { _() }).sum
+      }
+    }
   }
 }
