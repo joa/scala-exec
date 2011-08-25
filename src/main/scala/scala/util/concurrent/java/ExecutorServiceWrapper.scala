@@ -76,6 +76,8 @@ class ExecutorServiceWrapper(executorService: JExecutorService)
     JavaConversions.asScalaFuture(
       submit(JavaConversions.asJavaRunnable(f), result))
 
+  //TODO can we do better? submit already uses JavaConversions.asJavaXXXXX
+  
   protected def newTaskFor[A, B](f: () => A, result: B): JRunnableFuture[B] =
     JavaConversions.asJavaFutureTask(f, result)
 
