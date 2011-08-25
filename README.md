@@ -115,6 +115,7 @@ The `scala.util.concurrent.Future[A]` mirrors `java.util.concurrent.Future<V>` w
 * The additional `apply(timeout: Long, unit: TimeUnit = TimeUnits.Milliseconds)` method.
 
 This mans you are able to use the following shortcuts:
+
 ```scala
 def task() = "hello world"
 
@@ -126,5 +127,8 @@ f(100L, TimeUnits.Nanoseconds) //block for 100ns
 f(1L).right getOrElse "default"
 ```
 
+---
+
 [1] The current `ThreadPoolExecutor` implementation does leak `RejectedExecutionHandler` and BlockingQueue types which is subject to change.
+
 [2] For simplicity reasons the Executors object is an exception.
