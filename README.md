@@ -94,6 +94,10 @@ for {
   println(result)
 }
 
+
+exec.maximumPoolSize = 1
+
+exec(task)
 exec(task)
 
 val pending = exec.shutdownNow()
