@@ -15,6 +15,7 @@ object TimeUnits {
   case object Microseconds extends TimeUnit {
     override def toNanos(x: Long) = x * 1000L
   }
+
   case object Milliseconds extends TimeUnit {
     override def toNanos(x: Long) = x * 1000L * 1000L
   }

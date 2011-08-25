@@ -9,4 +9,11 @@ object DSL {
   }
   
   def submit[A](f: () => A): To[A] = new To(f)
+
+  def using[A <: ExecutorService, B](executor: A)(f: A => B) =
+    try {
+      f(executor)
+    } finally {
+      executor.terminate()
+    }
 }

@@ -1,27 +1,49 @@
 package scala.util.concurrent
 
+import org.specs2.mutable._
+
 /**
  * @author Joa Ebert
  */
-object DSLSpec {
-  def main(a: Array[String]) {
-    import DSL._
+class DSLSpec extends Specification {
+  "The scala-exec DSL" should {
+    "offer a using-directive which terminates an executor" in {
+      "even when an exception is trown" in {
+        import DSL._
 
-    val factory = (x: Runnable) => {
-      val result = new Thread(x)
-      result.setName("test")
-      result
+        val executor = Executors.newSingleThreadExecutor()
+
+        using(executor) {
+          _ match {
+            case x if true == false => "Not reachable by definition."
+            case _ => throw new Exception("Expected exception.")
+          }
+        } must throwA[Exception]
+
+        executor.isShutdown must beTrue
+        executor.isTerminated must beTrue
+      }
+
+      "when everything works as expected" in {
+        import DSL._
+
+        val executor = Executors.newSingleThreadExecutor()
+
+        using(executor) { e => true } must beTrue
+
+        executor.isShutdown must beTrue
+        executor.isTerminated must beTrue
+      }
     }
 
-    val executor = Executors.newCachedThreadPool(factory)
-    val future =
-       submit { () => println(Thread.currentThread); sys.error(""+123) } to executor
+    "support 'submit { () => A } to ExecutorService' syntax and return a Future[A]" in {
+      import DSL._
 
-    future.get(1L, TimeUnits.Seconds) match {
-      case Left(err) => println("ERROR: "+err)
-      case Right(value) => println(value)
+      using(Executors.newSingleThreadExecutor()) {
+        executor =>
+          val f = submit { () => true } to executor
+          f(100L) must beRight(true)
+      }
     }
-
-    executor.terminate()
   }
 }

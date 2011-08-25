@@ -42,4 +42,6 @@ trait ExecutorService extends Executor {
       }
     }
   }
+
+  def apply[A](f: () => A) = submit(f)
 }

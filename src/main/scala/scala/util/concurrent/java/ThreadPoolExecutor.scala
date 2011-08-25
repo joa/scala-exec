@@ -23,7 +23,7 @@ class ThreadPoolExecutor(threadPoolExecutor: JThreadPoolExecutor)
   def this(
       corePoolSize: Int,
       maximumPoolSize: Int,
-      keepAliveTime: Int,
+      keepAliveTime: Long,
       unit: TimeUnit,
       workQueue: JBlockingQueue[JRunnable] = new JSynchronousQueue(),
       threadFactory: JRunnable => Thread = Executors.defaultThreadFactory(),
