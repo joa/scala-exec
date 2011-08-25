@@ -20,7 +20,10 @@ trait ExecutorService extends Executor {
 
   def shutdown()
 
-  def shutdownNow(): Seq[() => _]
+  /**
+   * Analog to shutdownNow
+   */
+  def shutdownAndGetPending(): Seq[() => _]
 
   def submit[A](f: () => A): Future[A]
 

@@ -41,5 +41,31 @@ class ThreadPoolExecutorSpec extends Specification {
           f(100L) must beRight(true)
       }
     }
+
+    "return the the closure for pending tasks" in {
+      import _root_.java.util.concurrent.{LinkedBlockingQueue => JLinkedBlockingQueue}
+      val exec = new ThreadPoolExecutor(
+        1, 1, Long.MaxValue, TimeUnits.Nanoseconds,
+        workQueue = new JLinkedBlockingQueue(2)
+      )
+
+      try {
+        val task =
+          () => {
+            Thread.sleep(1000L)
+            42
+          }
+
+        exec(() => Thread.sleep(1000L))
+        exec(() => Thread.sleep(1000L))
+        exec(task)
+
+        val pending = exec.shutdownAndGetPending()
+
+        pending must contain(task)
+      } finally {
+        exec.terminate()
+      }
+    }
   }
 }

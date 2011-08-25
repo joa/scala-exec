@@ -3,3 +3,11 @@ target/
 project/boot/
 lib_managed/
 src_managed/
+.idea/.name
+.idea/compiler.xml
+.idea/copyright/
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/workspace.xml

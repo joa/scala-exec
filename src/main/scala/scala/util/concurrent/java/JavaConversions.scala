@@ -7,7 +7,8 @@ import java.util.concurrent.{
   ThreadFactory => JThreadFactory,
   TimeUnit => JTimeUnit,
   Callable => JCallable,
-  Future => JFuture
+  Future => JFuture,
+  FutureTask => JFutureTask
 }
 
 import java.lang.{Runnable => JRunnable}
@@ -29,6 +30,10 @@ object JavaConversions {
   def asJavaRunnable[A](f: () => A): JRunnable = new Runnable[A](f)
 
   def asJavaCallable[A](f: () => A): JCallable[A] = new Callable[A](f)
+
+  def asJavaFutureTask[A](f: () => A): JFutureTask[A] = new FutureTask[A](f)
+
+  def asJavaFutureTask[A, B](f: () => A, result: B): JFutureTask[B] = new FutureTaskWithResult[A, B](f, result)
 
   def asJavaThreadFactory(f: JRunnable => Thread): JThreadFactory =
     new JThreadFactory {
