@@ -25,4 +25,21 @@ trait ExecutorService extends Executor {
   def submit[A](f: () => A): Future[A]
 
   def submit[A, B](f: () => A, result: B): Future[B]
+
+  /**
+   * Terminates the executor service.
+   */
+  def terminate(timeout: Long = 500L, unit: TimeUnit = TimeUnits.Milliseconds) {
+    shutdown()
+
+    while(true) {
+      try {
+        awaitTermination(timeout, unit)
+        return;
+      } catch {
+        case interrupt: InterruptedException =>
+          // Try again.
+      }
+    }
+  }
 }

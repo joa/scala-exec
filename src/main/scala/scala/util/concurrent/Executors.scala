@@ -18,30 +18,38 @@ object Executors {
   
   import _root_.java.lang.{Runnable => JRunnable}
 
-  def newCachedThreadPool() =
+  def newCachedThreadPool(): ExecutorService =
     wrap(JExecutors.newCachedThreadPool())
 
-  def newCachedThreadPool(threadFactory: JRunnable => Thread) =
+  def newCachedThreadPool(threadFactory: JRunnable => Thread): ExecutorService =
     wrap(JExecutors.newCachedThreadPool(
       JavaConversions.asJavaThreadFactory(threadFactory)))
 
-  def newFixedThreadPool(numThreads: Int) =
+  def newFixedThreadPool(numThreads: Int): ExecutorService =
     wrap(JExecutors.newFixedThreadPool(numThreads))
 
-  def newFixedThreadPool(numThreads: Int, threadFactory: JRunnable => Thread) =
+  def newFixedThreadPool(numThreads: Int, threadFactory: JRunnable => Thread): ExecutorService =
     wrap(JExecutors.newFixedThreadPool(numThreads,
       JavaConversions.asJavaThreadFactory(threadFactory)))
 
-  def newSingleThreadExecutor() =
+  def newSingleThreadExecutor(): ExecutorService =
     wrap(JExecutors.newSingleThreadExecutor())
 
-  def newSingleThreadExecutor(threadFactory: JRunnable => Thread) =
-  JExecutors.newSingleThreadExecutor(
-    JavaConversions.asJavaThreadFactory(threadFactory))
+  def newSingleThreadExecutor(threadFactory: JRunnable => Thread): ExecutorService =
+    wrap(JExecutors.newSingleThreadExecutor(
+      JavaConversions.asJavaThreadFactory(threadFactory)))
 
   def defaultThreadFactory(): JRunnable => Thread = new Thread(_)
 
-  private def wrap(executor: JExecutor) =
+  private def wrap(executor: JExecutorService): ExecutorService =
+    executor match {
+      case threadPoolExecutor: JThreadPoolExecutor =>
+        new ThreadPoolExecutor(threadPoolExecutor)
+      case executorService: JExecutorService =>
+        new ExecutorServiceWrapper(executorService)
+    }
+
+  private def wrap(executor: JExecutor): Executor =
     executor match {
       case threadPoolExecutor: JThreadPoolExecutor =>
         new ThreadPoolExecutor(threadPoolExecutor)
