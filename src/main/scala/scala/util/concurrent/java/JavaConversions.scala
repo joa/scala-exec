@@ -25,22 +25,22 @@ object JavaConversions {
 
   val JavaTimeUnit = JTimeUnit.NANOSECONDS
   
-  def asScalaFuture[A](value: JFuture[A]): Future[A] = new FutureWrapper(value)
+  implicit def asScalaFuture[A](value: JFuture[A]): Future[A] = new FutureWrapper(value)
 
-  def asJavaRunnable[A](f: () => A): JRunnable = new Runnable[A](f)
+  implicit def asJavaRunnable[A](f: () => A): JRunnable = new Runnable[A](f)
 
-  def asJavaCallable[A](f: () => A): JCallable[A] = new Callable[A](f)
+  implicit def asJavaCallable[A](f: () => A): JCallable[A] = new Callable[A](f)
 
-  def asJavaFutureTask[A](f: () => A): JFutureTask[A] = new FutureTask[A](f)
+  implicit def asJavaFutureTask[A](f: () => A): JFutureTask[A] = new FutureTask[A](f)
 
-  def asJavaFutureTask[A, B](f: () => A, result: B): JFutureTask[B] = new FutureTaskWithResult[A, B](f, result)
+  implicit def asJavaFutureTask[A, B](f: () => A, result: B): JFutureTask[B] = new FutureTaskWithResult[A, B](f, result)
 
-  def asJavaThreadFactory(f: JRunnable => Thread): JThreadFactory =
+  implicit def asJavaThreadFactory(f: JRunnable => Thread): JThreadFactory =
     new JThreadFactory {
       def newThread(runnable: JRunnable) = f(runnable)
     }
 
-  def asEither[A](f: => A): Either[Throwable, A] =
+  implicit def asEither[A](f: => A): Either[Throwable, A] =
     try {
       Right(f)
     } catch {

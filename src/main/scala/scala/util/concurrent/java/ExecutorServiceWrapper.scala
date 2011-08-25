@@ -86,7 +86,7 @@ class ExecutorServiceWrapper(executorService: JExecutorService)
 
   override protected def newTaskFor[A](callable: JCallable[A]): JRunnableFuture[A] =
     callable match {
-      case x: WithFunction[A] => newTaskFor(x.f)
+      case x: WithFunction[_] => newTaskFor(x.f.asInstanceOf[() => A])
       case other => super.newTaskFor(other)
     }
   

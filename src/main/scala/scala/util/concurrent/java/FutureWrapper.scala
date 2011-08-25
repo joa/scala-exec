@@ -6,7 +6,7 @@ import scala.util.concurrent.{TimeUnit, Future}
 /**
  * @author Joa Ebert
  */
-protected final class FutureWrapper[A](future: JFuture[A]) extends Future[A] {
+final class FutureWrapper[A](future: JFuture[A]) extends Future[A] {
   override def cancel(mayInterruptIfRunning: Boolean) {
     future.cancel(mayInterruptIfRunning)
   }
