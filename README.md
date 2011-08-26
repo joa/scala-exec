@@ -89,7 +89,7 @@ val futures = exec.invokeAll(task :: task :: task :: Nil)
 
 for {
   future <- futures
-  result <- future
+  result <- future.asOption()
 } {
   println(result)
 }
