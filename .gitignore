@@ -11,3 +11,5 @@ src_managed/
 .idea/modules.xml
 .idea/vcs.xml
 .idea/workspace.xml
+.idea/findbugs-idea.xml
+scala-exec.iml

@@ -1,4 +1,4 @@
-package scala.util.concurrent
+package scala.util
 
 /**
  * @author Joa Ebert

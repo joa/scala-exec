@@ -21,8 +21,6 @@ class FutureSpec extends Specification {
     }
 
     "return a TimeoutException on timeout" in {
-      import concurrent.TimeoutException
-
       withExec {
         exec =>
           val f = exec(() => Thread.sleep(1000L))
