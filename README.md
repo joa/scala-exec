@@ -93,17 +93,35 @@ for {
 } {
   println(result)
 }
+```
+### shutdownNow vs. shutdownAndGetPending
 
+The `shutdownNow` method has been renamed to `shutdownAndGetPending` because it allows us to return a `Seq[() => _]` while inheriting from `java.util.concurrent.AbstractExecutorService`. 
+
+It would have been possible to have a `shutdownNow(): Seq[() => _]` method defined if the Scala version of `ThreadPoolExecutor` would implement methods like `invokeAll` etc. on its own.
+
+Since this is error prone and we can reuse a lot of JDK classes this way this is a tradeoff but we rely on already battle tested classes.
+
+The following code is an example of how `shutdownAndGetPending` can be used.
+
+```scala
+val exec = Executors.newCachedThreadPool()
+val task = () => "Y u no execute me?"
 
 exec.maximumPoolSize = 1
 
-exec(task)
+//fill the pool with some garbage
+for(i <- 0 to 10) {
+  exec(() => Thread.sleep(1000L))
+}
+
 exec(task)
 
-val pending = exec.shutdownNow()
-println(pending contains task) //true
+val pending = exec.shutdownAndGetPending()
+println(pending contains task) //probably true
 
-exec.terminate()
+//if you feel like it you can execute all pending tasks
+pending foreach { _() }
 ```
 
 ## Callable and Runnable
