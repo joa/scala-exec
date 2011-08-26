@@ -151,6 +151,6 @@ f(1L).right getOrElse "default"
 
 ---
 
-[1] The current `ThreadPoolExecutor` implementation does leak `RejectedExecutionHandler` and BlockingQueue types which is subject to change.
+[1] The current `ThreadPoolExecutor` implementation does leak `RejectedExecutionHandler` and `BlockingQueue` types which is subject to change.
 
-[2] For simplicity reasons the Executors object is an exception.
+[2] For simplicity reasons the `Executors` object is an exception.
