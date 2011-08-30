@@ -22,7 +22,7 @@ class ThreadPoolExecutorSpec extends Specification {
       withTPE {
         exec =>
           val f = exec(() => true)
-          f(100L) must beRight(true)
+          f(100L) must beTrue
       }
     }
 
@@ -38,7 +38,7 @@ class ThreadPoolExecutorSpec extends Specification {
       withTPE {
         exec =>
           val f = exec(task)
-          f(100L) must beRight(true)
+          f(100L) must beTrue
       }
     }
 

@@ -42,7 +42,7 @@ class DSLSpec extends Specification {
       using(Executors.newSingleThreadExecutor()) {
         executor =>
           val f = submit { () => true } to executor
-          f(100L) must beRight(true)
+          f(100L) must beTrue
       }
     }
   }
