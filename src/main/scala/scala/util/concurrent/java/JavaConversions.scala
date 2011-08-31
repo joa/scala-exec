@@ -39,4 +39,11 @@ object JavaConversions {
     new JThreadFactory {
       def newThread(runnable: JRunnable) = f(runnable)
     }
+
+  implicit def asEither[A](f: => A): Either[Throwable, A] =
+    try {
+      Right(f)
+    } catch {
+      case x => Left(x)
+    }
 }

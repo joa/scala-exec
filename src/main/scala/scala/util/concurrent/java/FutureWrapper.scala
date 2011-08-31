@@ -11,12 +11,21 @@ final class FutureWrapper[A](future: JFuture[A]) extends Future[A] {
     future.cancel(mayInterruptIfRunning)
   }
 
-  override def get(): A = future.get()
+  override def get(): Either[Throwable, A] =
+    try {
+      Right(future.get())
+    } catch {
+      case x => Left(x)
+    }
 
-  override def get(timeout: Long, unit: TimeUnit): A =
-    future.get(
-      JavaConversions.asJavaTimeUnit(timeout, unit),
-      JavaConversions.JavaTimeUnit)
+  override def get(timeout: Long, unit: TimeUnit): Either[Throwable, A] =
+    try {
+      Right(future.get(
+        JavaConversions.asJavaTimeUnit(timeout, unit),
+        JavaConversions.JavaTimeUnit))
+    } catch {
+      case x => Left(x)
+    }
 
   override def isCancelled: Boolean = future.isCancelled
 
