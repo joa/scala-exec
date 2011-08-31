@@ -28,7 +28,7 @@ class FutureSpec extends Specification {
       }
     }
 
-    /*"support for-selector syntax" in {
+    "support for-selector syntax" in {
       withExec {
         exec =>
           def task() = 1
@@ -38,7 +38,7 @@ class FutureSpec extends Specification {
           val results: Seq[Int] =
             for {
               future <- exec.invokeAll(tasks)
-              result <- future
+              result <- future.get().right.toOption //TODO fix me
             } yield {
               result
             }
@@ -47,50 +47,63 @@ class FutureSpec extends Specification {
       }
     }
 
-    "be None when cancelled" in {
-      import DSL._
-
-      using(Executors.newFixedThreadPool(2)) {
+    "return the error for any of two joined Futures" in {
+      withExec {
         exec =>
-          val f0 =
-            submit {
-              () => {
-                Thread.sleep(1000L)
-                false
-              }
-            } to exec
+          val f0 = exec(() => { sys.error("Error"); 1 })
+          val f1 = exec(() => 2)
+          val f2 = f0 join f1
 
-          val f1 =
-            submit {
-              () => {
-                f0.cancel(true)
-              }
-            } to exec
+          f2.get() must beLeft
+      }
 
-          f0.asOption() must beNone
+      withExec {
+        exec =>
+          val f0 = exec(() => 1)
+          val f1 = exec(() => { sys.error("Error"); 2 })
+          val f2 = f0 join f1
+          f2.get() must beLeft
       }
     }
 
-    "be None on timeout" in {
+    "try also the second option when the first Future fails in an OR case" in {
       withExec {
         exec =>
-          val f = exec(() => {
-            Thread.sleep(1000L)
-            false
-          })
+          val f0 = exec(() => { Thread.sleep(32L); 1 })
+          val f1 = exec(() => { sys.error(""); 2 })
+          val f2 = f0 or f1
+          f2() must_== 1
+      }
+    }
+  }
 
-          f.asOption(1L, TimeUnits.Nanoseconds) must beNone
+  "The Future[A]" can {
+    "be joined with a Future[B] to create a Future[(A, B)]" in {
+      withExec {
+        exec =>
+          val f0 = exec(() => 1)
+          val f1 = exec(() => 2)
+          val f2 = f0 join f1
+          f2() must_==  (1, 2)
       }
     }
 
-    "return the alternative when an exception occurrs" in {
+    "be combined with a Future[B >: A] and the first to succeed wins" in {
       withExec {
         exec =>
-          def task(): Boolean = sys.error("Expected.")
-          val f = exec(task)
-
-          f.asOption() must beNone
+          val f0 = exec(() => { Thread.sleep(1000L); 1 })
+          val f1 = exec(() => 2)
+          val f2 = f0 or f1
+          f2() must_== 2
       }
-    }*/
+
+      withExec {
+        exec =>
+          val f0 = exec(() => 1)
+          val f1 = exec(() => { Thread.sleep(1000L); 2 })
+          val f2 = f0 or f1
+          f2() must_== 1
+      }
+    }
   }
 }

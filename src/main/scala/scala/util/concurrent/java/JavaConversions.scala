@@ -31,9 +31,9 @@ object JavaConversions {
 
   implicit def asJavaCallable[A](f: () => A): JCallable[A] = new Callable[A](f)
 
-  implicit def asJavaFutureTask[A](f: () => A): JFutureTask[A] = new FutureTask[A](f)
+  def asJavaFutureTask[A](f: () => A): JFutureTask[A] = new FutureTask[A](f)
 
-  implicit def asJavaFutureTask[A, B](f: () => A, result: B): JFutureTask[B] = new FutureTaskWithResult[A, B](f, result)
+  def asJavaFutureTask[A, B](f: () => A, result: B): JFutureTask[B] = new FutureTaskWithResult[A, B](f, result)
 
   implicit def asJavaThreadFactory(f: JRunnable => Thread): JThreadFactory =
     new JThreadFactory {

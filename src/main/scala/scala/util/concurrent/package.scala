@@ -10,18 +10,4 @@ package object concurrent {
 
   type ThreadPoolExecutor = java.ThreadPoolExecutor
   val ThreadPoolExecutor = java.ThreadPoolExecutor
-
-  def fork[U](f: => U) = {
-    import _root_.java.lang.{Thread => JThread, Runnable => JRunnable}
-
-    val result =
-      new JThread(new JRunnable {
-        override def run() {
-          f
-        }
-      })
-
-    result.start()
-    result
-  }
 }

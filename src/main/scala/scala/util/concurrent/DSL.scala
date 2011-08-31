@@ -16,4 +16,18 @@ object DSL {
     } finally {
       executor.terminate()
     }
+
+  def fork[U](f: => U) = {
+    import _root_.java.lang.{Thread => JThread, Runnable => JRunnable}
+
+    val result =
+      new JThread(new JRunnable {
+        override def run() {
+          f
+        }
+      })
+
+    result.start()
+    result
+  }
 }
