@@ -20,15 +20,17 @@ val exec = Executors.newCachedThreadPool()
 val f0 = exec(task)
 val f1 = exec(task)
 
-f0(500L) match { // block for 500ms
+f0.get(500L) match { // block for 500ms
   case Right(value) => println(value) //we will probably not get here
   case Left(error) => println("ERROR: "+error) //it is more likely we reach this one
 }
 
-f1(2L, TimeUnits.Seconds) match {
+f1.get(2L, TimeUnits.Seconds) match {
   case Right(value) => println(value) //we should see "true"
   case Left(error) => println("ERROR: "+error) //very unlikely we reach this one
 }
+
+println(f0()) //we should see "true"
 
 exec.terminate() //performs shutdown and awaitTermination
 ```
@@ -52,6 +54,11 @@ using(Executors.newSingleThreadExecutor()) {
       
     println(future()) //waits for 1sec and prints Right(true)
 }
+
+val newThread =
+  fork {
+    Thread.sleep(1000L)
+  }
 ```
 
 
@@ -89,9 +96,8 @@ val futures = exec.invokeAll(task :: task :: task :: Nil)
 
 for {
   future <- futures
-  result <- future.asOption()
 } {
-  println(result)
+  println(future())
 }
 ```
 ### shutdownNow vs. shutdownAndGetPending
@@ -132,13 +138,22 @@ The library works always with `() => A` for cases where the Java version would u
 ## Future
 The `scala.util.concurrent.Future[A]` mirrors `java.util.concurrent.Future<V>` with small modifications.
 
-* `get()` and `get(timeout: Long, unit: TimeUnit)` return `Either[Throwable, A]`
-* `scala.util.concurrent.Future[A]` extends `() => Either[Throwable, A]`
+* `get()` and `get(timeout: Long, unit: TimeUnit)` return `Either[Throwable, A]`.
+* `scala.util.concurrent.Future[A]` extends `() => A`.
 * The additional `apply(timeout: Long, unit: TimeUnit = TimeUnits.Milliseconds)` method.
+* `or[B >: A](that: Future[B]): Future[B]` to select the first Future which is done.
+* `join[B](that: Future[B]): Future[(A, B)]` to combine two Futures.
+* `value: Option[A]` which returns `Some` value if computed.
+* The `view` method to create a `FutureView[A]`.
+* `map`, `flatMap` and `foreach`
+* `mapWithExec`, `flatMapWithExec` and `forEachWithExec`
 
 This mans you are able to use the following shortcuts:
 
 ```scala
+implicit val exec = Executors.newCachedThreadPool()
+val exec2 = Executors.newCachedThreadPool()
+
 def task() = "hello world"
 
 val f = exec(task)
@@ -146,7 +161,17 @@ val f = exec(task)
 f() //block until done
 f(100L) //block for 100ms
 f(100L, TimeUnits.Nanoseconds) //block for 100ns
-f(1L).right getOrElse "default"
+f.get(1L).right getOrElse "default"
+
+val f0 = exec(task) map { _.toUpperCase } // _.toUpperCase will be executed using exec via implicit
+val f1 = exec(task) mapWithExec(exec2) { _.toUpperCase } //explicitly choose exec2
+
+println(f0())
+println(f1())
+
+
+val f2 = f.view map { _.toUpperCase }
+f2() //the map function will be executed on demand in callers thread
 ```
 
 ---
