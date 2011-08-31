@@ -114,8 +114,8 @@ trait Future[+A] extends (() => A) {
 trait FutureView[+A] extends Future[A] {
   original =>
 
-  def map[AA >: A, B](f: AA => B): Future[B] =
-    new Future[B] {
+  def map[AA >: A, B](f: AA => B): FutureView[B] =
+    new FutureView[B] {
       override def cancel(mayInterruptIfRunning: Boolean) {
         original.cancel(mayInterruptIfRunning)
       }
@@ -136,8 +136,8 @@ trait FutureView[+A] extends Future[A] {
         }
     }
 
-  def flatMap[AA >: A, B](f: AA => Future[B]): Future[B] =
-    new Future[B] {
+  def flatMap[AA >: A, B](f: AA => Future[B]): FutureView[B] =
+    new FutureView[B] {
       override def cancel(mayInterruptIfRunning: Boolean) {
         original.cancel(mayInterruptIfRunning)
       }
