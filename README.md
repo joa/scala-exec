@@ -52,7 +52,7 @@ using(Executors.newSingleThreadExecutor()) {
           true
       } to exec
       
-    println(future()) //waits for 1sec and prints Right(true)
+    println(future()) //waits for 1sec and prints true
 }
 
 val newThread =
